@@ -7,24 +7,24 @@ include(masm_support.cmake)
 #         )
 
 FetchContent_Declare(
-        openssl
+        openssl_src
         ${OPENSSL_FETCH_INFO}
 )
-FetchContent_GetProperties(openssl)
-if (NOT openssl_POPULATED)
-    FetchContent_Populate(openssl)
+FetchContent_GetProperties(openssl_src)
+if (NOT openssl_src_POPULATED)
+    FetchContent_Populate(openssl_src)
 endif()
 
 if(WIN32)
-    set(OPENSSL_MAKEFILE "${openssl_SOURCE_DIR}/makefile")
-    FILE(COPY ${CMAKE_CURRENT_SOURCE_DIR}/10-main.conf DESTINATION ${openssl_SOURCE_DIR}/Configurations)
+    set(OPENSSL_MAKEFILE "${openssl_src_SOURCE_DIR}/makefile")
+    FILE(COPY ${CMAKE_CURRENT_SOURCE_DIR}/10-main.conf DESTINATION ${openssl_src_SOURCE_DIR}/Configurations)
     if (X64)
         set(OPENSSL_COMPILER "VC-WIN64A")
     else()
         set(OPENSSL_COMPILER "VC-WIN32")
     endif()
 else()
-    set(OPENSSL_MAKEFILE "${openssl_SOURCE_DIR}/Makefile")
+    set(OPENSSL_MAKEFILE "${openssl_src_SOURCE_DIR}/Makefile")
     if (X64)
         set(OPENSSL_COMPILER "linux-x86_64")
     else()
@@ -39,14 +39,14 @@ message("openssl configure: perl Configure ${OPENSSL_COMPILER} ${OPENSSL_CONFIGU
 add_custom_command(
         OUTPUT "${OPENSSL_MAKEFILE}"
         COMMAND perl Configure ${OPENSSL_COMPILER} ${OPENSSL_CONFIGURE_OPTIONS}
-        WORKING_DIRECTORY ${openssl_SOURCE_DIR}
+        WORKING_DIRECTORY ${openssl_src_SOURCE_DIR}
 )
 
 add_custom_target(openssl-config DEPENDS "${OPENSSL_MAKEFILE}")
 
 add_custom_target(openssl-build
         COMMAND ${CMAKE_MAKE_PROGRAM} ${OPENSSL_MAKE_OPTIONS}
-        WORKING_DIRECTORY ${openssl_SOURCE_DIR}
+        WORKING_DIRECTORY ${openssl_src_SOURCE_DIR}
         DEPENDS openssl-config
 )
 
@@ -62,19 +62,19 @@ add_dependencies(openssl_crypto_static openssl-build)
 
 target_include_directories(openssl_ssl
         INTERFACE
-        ${openssl_SOURCE_DIR}/include
+        ${openssl_src_SOURCE_DIR}/include
         )
 target_include_directories(openssl_ssl_static
         INTERFACE
-        ${openssl_SOURCE_DIR}/include
+        ${openssl_src_SOURCE_DIR}/include
         )
 target_include_directories(openssl_crypto
         INTERFACE
-        ${openssl_SOURCE_DIR}/include
+        ${openssl_src_SOURCE_DIR}/include
         )
 target_include_directories(openssl_crypto_static
         INTERFACE
-        ${openssl_SOURCE_DIR}/include
+        ${openssl_src_SOURCE_DIR}/include
         )
 
 if(MSVC)
@@ -86,86 +86,86 @@ if(MSVC)
             OPENSSL_OPT_WINDLL)
     set_target_properties(
             openssl_crypto PROPERTIES
-            IMPORTED_LOCATION ${openssl_SOURCE_DIR}/libcrypto-1_1.dll
-            IMPORTED_IMPLIB ${openssl_SOURCE_DIR}/libcrypto.lib
-            INTERFACE_INCLUDE_DIRECTORIES ${openssl_SOURCE_DIR}/include
+            IMPORTED_LOCATION ${openssl_src_SOURCE_DIR}/libcrypto-1_1.dll
+            IMPORTED_IMPLIB ${openssl_src_SOURCE_DIR}/libcrypto.lib
+            INTERFACE_INCLUDE_DIRECTORIES ${openssl_src_SOURCE_DIR}/include
     )
     set_target_properties(
             openssl_crypto_static PROPERTIES
-            IMPORTED_LOCATION ${openssl_SOURCE_DIR}/libcrypto_static.lib
-            INTERFACE_INCLUDE_DIRECTORIES ${openssl_SOURCE_DIR}/include
+            IMPORTED_LOCATION ${openssl_src_SOURCE_DIR}/libcrypto_static.lib
+            INTERFACE_INCLUDE_DIRECTORIES ${openssl_src_SOURCE_DIR}/include
     )
     set_target_properties(
             openssl_ssl PROPERTIES
-            IMPORTED_LOCATION ${openssl_SOURCE_DIR}/libssl-1_1.dll
-            IMPORTED_IMPLIB ${openssl_SOURCE_DIR}/libssl.lib
-            INTERFACE_INCLUDE_DIRECTORIES ${openssl_SOURCE_DIR}/include
+            IMPORTED_LOCATION ${openssl_src_SOURCE_DIR}/libssl-1_1.dll
+            IMPORTED_IMPLIB ${openssl_src_SOURCE_DIR}/libssl.lib
+            INTERFACE_INCLUDE_DIRECTORIES ${openssl_src_SOURCE_DIR}/include
     )
     set_target_properties(
             openssl_ssl_static PROPERTIES
-            IMPORTED_LOCATION ${openssl_SOURCE_DIR}/libssl_static.lib
-            INTERFACE_INCLUDE_DIRECTORIES ${openssl_SOURCE_DIR}/include
+            IMPORTED_LOCATION ${openssl_src_SOURCE_DIR}/libssl_static.lib
+            INTERFACE_INCLUDE_DIRECTORIES ${openssl_src_SOURCE_DIR}/include
     )
 
     install(FILES
-            ${openssl_SOURCE_DIR}/libcrypto-1_1.dll
-            ${openssl_SOURCE_DIR}/libssl-1_1.dll
-            ${openssl_SOURCE_DIR}/apps/openssl.exe
+            ${openssl_src_SOURCE_DIR}/libcrypto-1_1.dll
+            ${openssl_src_SOURCE_DIR}/libssl-1_1.dll
+            ${openssl_src_SOURCE_DIR}/apps/openssl.exe
             DESTINATION bin
             )
 
     install(FILES
-            ${openssl_SOURCE_DIR}/libcrypto.lib
-            ${openssl_SOURCE_DIR}/libssl.lib
-            ${openssl_SOURCE_DIR}/libcrypto_static.lib
-            ${openssl_SOURCE_DIR}/libssl_static.lib
+            ${openssl_src_SOURCE_DIR}/libcrypto.lib
+            ${openssl_src_SOURCE_DIR}/libssl.lib
+            ${openssl_src_SOURCE_DIR}/libcrypto_static.lib
+            ${openssl_src_SOURCE_DIR}/libssl_static.lib
             DESTINATION lib
             )
 
-    install(FILES ${openssl_SOURCE_DIR}/libcrypto-1_1.pdb
-            FILES ${openssl_SOURCE_DIR}/libssl-1_1.pdb
-            FILES ${openssl_SOURCE_DIR}/ossl_static.pdb
+    install(FILES ${openssl_src_SOURCE_DIR}/libcrypto-1_1.pdb
+            FILES ${openssl_src_SOURCE_DIR}/libssl-1_1.pdb
+            FILES ${openssl_src_SOURCE_DIR}/ossl_static.pdb
             DESTINATION dbg
             )
 else()
     set_target_properties(
             openssl_crypto PROPERTIES
-            IMPORTED_LOCATION ${openssl_SOURCE_DIR}/libcrypto.so
-            INTERFACE_INCLUDE_DIRECTORIES ${openssl_SOURCE_DIR}/include
+            IMPORTED_LOCATION ${openssl_src_SOURCE_DIR}/libcrypto.so
+            INTERFACE_INCLUDE_DIRECTORIES ${openssl_src_SOURCE_DIR}/include
     )
     set_target_properties(
             openssl_crypto_static PROPERTIES
-            IMPORTED_LOCATION ${openssl_SOURCE_DIR}/libcrypto.a
-            INTERFACE_INCLUDE_DIRECTORIES ${openssl_SOURCE_DIR}/include
+            IMPORTED_LOCATION ${openssl_src_SOURCE_DIR}/libcrypto.a
+            INTERFACE_INCLUDE_DIRECTORIES ${openssl_src_SOURCE_DIR}/include
     )
     set_target_properties(
             openssl_ssl PROPERTIES
-            IMPORTED_LOCATION ${openssl_SOURCE_DIR}/libssl.so
-            INTERFACE_INCLUDE_DIRECTORIES ${openssl_SOURCE_DIR}/include
+            IMPORTED_LOCATION ${openssl_src_SOURCE_DIR}/libssl.so
+            INTERFACE_INCLUDE_DIRECTORIES ${openssl_src_SOURCE_DIR}/include
     )
     set_target_properties(
             openssl_ssl_static PROPERTIES
-            IMPORTED_LOCATION ${openssl_SOURCE_DIR}/libssl.a
-            INTERFACE_INCLUDE_DIRECTORIES ${openssl_SOURCE_DIR}/include
+            IMPORTED_LOCATION ${openssl_src_SOURCE_DIR}/libssl.a
+            INTERFACE_INCLUDE_DIRECTORIES ${openssl_src_SOURCE_DIR}/include
     )
 
     install(FILES
-            ${openssl_SOURCE_DIR}/libcrypto.so
-            ${openssl_SOURCE_DIR}/libcrypto.so.1.1
-            ${openssl_SOURCE_DIR}/libssl.so
-            ${openssl_SOURCE_DIR}/libssl.so.1.1
-            ${openssl_SOURCE_DIR}/apps/openssl
+            ${openssl_src_SOURCE_DIR}/libcrypto.so
+            ${openssl_src_SOURCE_DIR}/libcrypto.so.1.1
+            ${openssl_src_SOURCE_DIR}/libssl.so
+            ${openssl_src_SOURCE_DIR}/libssl.so.1.1
+            ${openssl_src_SOURCE_DIR}/apps/openssl
             DESTINATION bin
             )
 
     install(FILES
-            ${openssl_SOURCE_DIR}/libcrypto.a
-            ${openssl_SOURCE_DIR}/libssl.a
+            ${openssl_src_SOURCE_DIR}/libcrypto.a
+            ${openssl_src_SOURCE_DIR}/libssl.a
             DESTINATION lib
             )
 endif()
 
-install(DIRECTORY ${openssl_SOURCE_DIR}/include/openssl/
+install(DIRECTORY ${openssl_src_SOURCE_DIR}/include/openssl/
         DESTINATION include/openssl
         )
 
