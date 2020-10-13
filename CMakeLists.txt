@@ -1,4 +1,5 @@
 include(masm_support.cmake)
+include(make_support.cmake)
 
 # example
 # set(OPENSSL_FETCH_INFO
@@ -44,10 +45,25 @@ add_custom_command(
 
 add_custom_target(openssl-config DEPENDS "${OPENSSL_MAKEFILE}")
 
-add_custom_target(openssl-build
-        COMMAND ${CMAKE_MAKE_PROGRAM} ${OPENSSL_MAKE_OPTIONS}
+if(WIN32)
+    set(OPENSSL_OUT_FILES
+            ${openssl_src_SOURCE_DIR}/apps/openssl.exe
+            )
+else()
+    set(OPENSSL_OUT_FILES
+            ${openssl_src_SOURCE_DIR}/apps/openssl
+            )
+endif()
+
+add_custom_command(
+        OUTPUT ${OPENSSL_OUT_FILES}
+        COMMAND ${MAKE_PROGRAM} ${OPENSSL_MAKE_OPTIONS}
         WORKING_DIRECTORY ${openssl_src_SOURCE_DIR}
         DEPENDS openssl-config
+)
+
+add_custom_target(openssl-build
+        DEPENDS ${OPENSSL_OUT_FILES}
 )
 
 add_library(openssl_ssl SHARED IMPORTED GLOBAL)
@@ -77,7 +93,7 @@ target_include_directories(openssl_crypto_static
         ${openssl_src_SOURCE_DIR}/include
         )
 
-if(MSVC)
+if(WIN32)
     add_compile_definitions(openssl_ssl
             INTERFACE
             OPENSSL_OPT_WINDLL)
