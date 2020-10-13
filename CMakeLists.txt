@@ -1,3 +1,11 @@
+if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
+    set(X64 1)
+endif()
+
+if(CMAKE_CL_64)
+    set(X64 1)
+endif()
+
 include(masm_support.cmake)
 include(make_support.cmake)
 
