@@ -17,7 +17,7 @@ set(OPENSSL_FETCH_INFO
 FetchContent_Declare(
         openssl
         GIT_REPOSITORY https://github.com/jc-lab/openssl-cmake.git
-        GIT_TAG        e5bf7d1f86281f9e702a509cb3ee84e0e5708fad
+        GIT_TAG        29829bd0371365d023d89423a1ffa9dcb543c5a0
 )
 FetchContent_GetProperties(openssl)
 if (NOT openssl_POPULATED)
