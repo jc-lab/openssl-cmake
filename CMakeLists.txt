@@ -1,3 +1,9 @@
+include(FetchContent)
+set(OPENSSL_FETCH_INFO
+        URL https://www.openssl.org/source/openssl-1.1.1h.tar.gz
+        URL_HASH SHA256=5c9ca8774bd7b03e5784f26ae9e9e6d749c9da2438545077e6b3d755a06595d9
+        )
+
 if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
     set(X64 1)
 endif()
@@ -24,11 +30,13 @@ if (NOT openssl_src_POPULATED)
     FetchContent_Populate(openssl_src)
 endif()
 
+set(OPENSSL_TARGET_POSTFIX)
 if(WIN32)
     set(OPENSSL_MAKEFILE "${openssl_src_SOURCE_DIR}/makefile")
     FILE(COPY ${CMAKE_CURRENT_SOURCE_DIR}/10-main.conf DESTINATION ${openssl_src_SOURCE_DIR}/Configurations)
     if (X64)
         set(OPENSSL_COMPILER "VC-WIN64A")
+        set(OPENSSL_TARGET_POSTFIX "-x64")
     else()
         set(OPENSSL_COMPILER "VC-WIN32")
     endif()
@@ -110,7 +118,7 @@ if(WIN32)
             OPENSSL_OPT_WINDLL)
     set_target_properties(
             openssl_crypto PROPERTIES
-            IMPORTED_LOCATION ${openssl_src_SOURCE_DIR}/libcrypto-1_1.dll
+            IMPORTED_LOCATION ${openssl_src_SOURCE_DIR}/libcrypto-1_1${OPENSSL_TARGET_POSTFIX}.dll
             IMPORTED_IMPLIB ${openssl_src_SOURCE_DIR}/libcrypto.lib
             INTERFACE_INCLUDE_DIRECTORIES ${openssl_src_SOURCE_DIR}/include
     )
@@ -121,7 +129,7 @@ if(WIN32)
     )
     set_target_properties(
             openssl_ssl PROPERTIES
-            IMPORTED_LOCATION ${openssl_src_SOURCE_DIR}/libssl-1_1.dll
+            IMPORTED_LOCATION ${openssl_src_SOURCE_DIR}/libssl-1_1${OPENSSL_TARGET_POSTFIX}.dll
             IMPORTED_IMPLIB ${openssl_src_SOURCE_DIR}/libssl.lib
             INTERFACE_INCLUDE_DIRECTORIES ${openssl_src_SOURCE_DIR}/include
     )
@@ -132,8 +140,8 @@ if(WIN32)
     )
 
     install(FILES
-            ${openssl_src_SOURCE_DIR}/libcrypto-1_1.dll
-            ${openssl_src_SOURCE_DIR}/libssl-1_1.dll
+            ${openssl_src_SOURCE_DIR}/libcrypto-1_1${OPENSSL_TARGET_POSTFIX}.dll
+            ${openssl_src_SOURCE_DIR}/libssl-1_1${OPENSSL_TARGET_POSTFIX}.dll
             ${openssl_src_SOURCE_DIR}/apps/openssl.exe
             DESTINATION bin
             )
@@ -146,8 +154,8 @@ if(WIN32)
             DESTINATION lib
             )
 
-    install(FILES ${openssl_src_SOURCE_DIR}/libcrypto-1_1.pdb
-            FILES ${openssl_src_SOURCE_DIR}/libssl-1_1.pdb
+    install(FILES ${openssl_src_SOURCE_DIR}/libcrypto-1_1${OPENSSL_TARGET_POSTFIX}.pdb
+            FILES ${openssl_src_SOURCE_DIR}/libssl-1_1${OPENSSL_TARGET_POSTFIX}.pdb
             FILES ${openssl_src_SOURCE_DIR}/ossl_static.pdb
             DESTINATION dbg
             )
