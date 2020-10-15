@@ -1,8 +1,4 @@
 include(FetchContent)
-set(OPENSSL_FETCH_INFO
-        URL https://www.openssl.org/source/openssl-1.1.1h.tar.gz
-        URL_HASH SHA256=5c9ca8774bd7b03e5784f26ae9e9e6d749c9da2438545077e6b3d755a06595d9
-        )
 
 if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
     set(X64 1)
