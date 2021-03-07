@@ -198,9 +198,9 @@ install(DIRECTORY ${openssl_src_SOURCE_DIR}/include/openssl/
         )
 
 if(OPENSSL_USE_STATIC_LIBS)
-    add_library(OpenSSL::Crypto ALIAS openssl_crypto)
-    add_library(OpenSSL::SSL ALIAS openssl_ssl)
-else()
     add_library(OpenSSL::Crypto ALIAS openssl_crypto_static)
     add_library(OpenSSL::SSL ALIAS openssl_ssl_static)
+else()
+    add_library(OpenSSL::Crypto ALIAS openssl_crypto)
+    add_library(OpenSSL::SSL ALIAS openssl_ssl)
 endif()
