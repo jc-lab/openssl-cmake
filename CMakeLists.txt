@@ -1,11 +1,9 @@
 include(FetchContent)
 
-if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
-    set(X64 1)
-endif()
-
-if(CMAKE_CL_64)
-    set(X64 1)
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(X64 TRUE)
+else()
+    set(X64 FALSE)
 endif()
 
 include(masm_support.cmake)
@@ -47,6 +45,21 @@ endif()
 
 set(OPENSSL_CONFIGURE_OPTIONS no-zlib no-md2 no-mdc2 no-rc4 no-rc5 no-asm shared)
 set(OPENSSL_MAKE_OPTIONS)
+
+if (NOT WIN32)
+    string(REGEX MATCHALL "<([^>]+)>" TEMP_MATCHES "${CMAKE_C_LINK_EXECUTABLE}")
+    set(RESOLVED_C_LINK_EXECUTABLE "${CMAKE_C_LINK_EXECUTABLE}")
+    foreach(item IN ITEMS ${TEMP_MATCHES})
+        if ("${item}" MATCHES "<([^>]+)>")
+            string(REPLACE "${CMAKE_MATCH_0}" "${${CMAKE_MATCH_1}}" RESOLVED_C_LINK_EXECUTABLE "${RESOLVED_C_LINK_EXECUTABLE}")
+        endif()
+    endforeach()
+    string(REPLACE "-o" "" RESOLVED_C_LINK_EXECUTABLE "${RESOLVED_C_LINK_EXECUTABLE}")
+    message("RESOLVED_C_LINK_EXECUTABLE = ${RESOLVED_C_LINK_EXECUTABLE}")
+    set(OPENSSL_MAKE_OPTIONS CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} LD=${RESOLVED_C_LINK_EXECUTABLE} MAKEDEPPROG=${CMAKE_C_COMPILER})
+endif()
+message("OPENSSL_MAKE_OPTIONS: ${OPENSSL_MAKE_OPTIONS}")
+message("CMAKE_C_LINK_FLAGS: ${CMAKE_C_LINK_FLAGS}")
 
 message("openssl configure: perl Configure ${OPENSSL_COMPILER} ${OPENSSL_CONFIGURE_OPTIONS}")
 add_custom_command(
