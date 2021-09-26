@@ -1,4 +1,30 @@
 if (MSVC)
+    # CMake older than 2.6.3 does not automatically look for ml or ml64
+    if ("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
+        # CMAKE_C_COMPILER doesn't have full path, unless user has in PATH
+        if (MSVC10)
+            get_filename_component(vc_dir [HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0\\Setup\\VC;ProductDir] REALPATH)
+        elseif (MSVC90)
+            get_filename_component(vc_dir [HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\9.0\\Setup\\VC;ProductDir] REALPATH)
+        elseif (MSVC80)
+            get_filename_component(vc_dir [HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\Setup\\VC;ProductDir] REALPATH)
+        endif()
+        if (vc_dir)
+            if (X64)
+                set(cl_path "${vc_dir}/bin/amd64")
+            else (X64)
+                set(cl_path "${vc_dir}/bin")
+            endif (X64)
+        endif()
+    else ()
+        get_filename_component(cl_path ${CMAKE_C_COMPILER} PATH)
+    endif ()
+    if (NOT cl_path)
+        get_filename_component(cl_path ${CMAKE_C_COMPILER} PATH)
+    endif()
+
+    message("cl_path: ${cl_path}")
+
     if (X64)
         # In case of NMake Makefiles CMAKE_ASM_COMPILER will find cl.exe, thus we need
         # to do it manually for both ml.exe and ml64.exe
